@@ -85,11 +85,11 @@ static int inputPasswd(int x, int y) {
 		{
 			return 0;
 		}
-		else if (strcmp(passwd, deliverySystem[x][y].passwd[i]) == 0)	//저장된 패스워드와 입력 패스워드가 같을 시
+		else if (passwd == deliverySystem[x][y].passwd[i])	//저장된 패스워드와 입력 패스워드가 같을 시
 		{
 			return 0;
 		}
-		if (deliverySystem[x][y].passwd[i] != passwd[i])
+		else if (deliverySystem[x][y].passwd[i] != passwd[i])
 		{
 			return -1;
 		}
@@ -106,12 +106,42 @@ static int inputPasswd(int x, int y) {
 //char* filepath : filepath and name to write
 //return : 0 - backup was successfully done, -1 - failed to backup
 int str_backupSystem(char* filepath) {
+	int x;
+	int y;
 
+	//filepath 읽기 모드로 전환
 	FILE*fp;
 	fp = fopen(filepath, "w"); 
 	if (fp == NULL)
 	{
 		return -1;
+	}
+	return 0;
+
+	systemSize[0] = x;
+	systemSize[1] = y;
+
+	//storage 초기값 생성
+	for (x = 0; x < systemSize[0]; x++)
+	{
+		for (y = 0; y < systemSize[1]; y++)
+		{
+			initStorage(x, y);
+		}
+	}
+
+	//입력한 building, room, passwd, context backup
+	fprintf(fp, "%d %d\n", systemSize[0], systemSize[1]);
+
+	for (x = 0; x < systemSize[0]; x++)
+	{
+		for (y = 0; y < systemSize[1]; y++)
+		{
+			if (deliverySystem[x][y].cnt > 0)
+			{
+				fprintf(fp, "%d %d %d %d %s %s\n", x, y, deliverySystem[x][y].building, deliverySystem[x][y].room, deliverySystem[x][y].passwd, deliverySystem[x][y].context);
+			}
+		}
 	}
 	return 0;
 }
@@ -123,13 +153,16 @@ int str_backupSystem(char* filepath) {
 //return : 0 - successfully created, -1 - failed to create the system
 int str_createSystem(char* filepath) {
 	int i;
+	char *context;
 
-	deliverySystem = (storage_t**)malloc(4 * sizeof(storage_t*));
-		for (i = 0; i < 4 ; i++)
-		{
-			deliverySystem[i] = (storage_t*)malloc(6 * sizeof(storage_t));
-		}
+	deliverySystem = (storage_t**)malloc(systemSize[0] * sizeof(storage_t*));
+	for (i = 0; i < systemSize[0]; i++)
+	{
+		deliverySystem[i] = (storage_t*)malloc(systemSize[1] * sizeof(storage_t));
+	}
 	return 0;
+
+	context = (char*)malloc(sizeof(char));
 
 	FILE *fp;
 	if ((fp = fopen(filepath, "r")) == NULL)
@@ -145,7 +178,7 @@ int str_createSystem(char* filepath) {
 void str_freeSystem(void) {
 	int i = 0;
 
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < systemSize[0]; i++)
 	{
 		free(deliverySystem[i]);
 	}
@@ -213,7 +246,25 @@ int str_checkStorage(int x, int y) {
 //char passwd[] : password string (4 characters)
 //return : 0 - successfully put the package, -1 - failed to put
 int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_SIZE + 1], char passwd[PASSWD_LEN + 1]) {
+	int i;
 
+	systemSize[0] = x;
+	systemSize[1] = y;
+
+	deliverySystem[x][y].building = nBuilding;
+	deliverySystem[x][y].room = nRoom;
+	deliverySystem[x][y].context = msg[MAX_MSG_SIZE + 1];
+
+	for (i = 0; i < PASSWD_LEN + 1; ++i)
+	{
+		deliverySystem[x][y].passwd[i] = passwd[i];
+	}
+
+	if (deliverySystem[x][y].cnt = 1)
+	{
+		return -1;
+	}
+	return 0;
 }
 
 
@@ -223,7 +274,26 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 //int x, int y : coordinate of the cell to extract
 //return : 0 - successfully extracted, -1 = failed to extract
 int str_extractStorage(int x, int y) {
+	char passwd[PASSWD_LEN + 1];
+	char *context;
 
+	for (x = 0; x < systemSize[0]; x++)
+	{
+		for (y = 0; y < systemSize[1]; y++)
+		{
+			if (passwd == deliverySystem[x][y].passwd)
+			{
+				return 0;
+
+				free(context);
+
+				printStorageInside(x, y);
+
+				initStorage(x, y);
+			}
+		}
+	}
+	return -1;
 }
 
 //find my package from the storage
@@ -231,8 +301,23 @@ int str_extractStorage(int x, int y) {
 //int nBuilding, int nRoom : my building/room numbers
 //return : number of packages that the storage system has
 int str_findStorage(int nBuilding, int nRoom) {
+	int x, y;
+	int cnt;
 
+	do
+	{
+		for (x = 0; x < systemSize[0]; x++)
+		{
+			for (y = 0; y < systemSize[1]; y++)
+			{
+				if (deliverySystem[x][y].building == nBuilding && deliverySystem[x][y].room == nRoom)
+				{
+					printf(" -----------> Found a package in (%d, %d)\n", x, y);
+					cnt++;
+				}
+			}
+		}
+	}while (cnt = 0);
+
+	return cnt;
 }
-
-
-
