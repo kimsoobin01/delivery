@@ -219,15 +219,26 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 //int x, int y : coordinate of the cell to extract
 //return : 0 - successfully extracted, -1 = failed to extract
 int str_extractStorage(int x, int y) {
-   char passwd[PASSWD_LEN + 1];
+	char passwd[PASSWD_LEN + 1];
+	char *context;
 
-   if (inputPasswd(x, y) != 0) return -1; // 패스워드가 일치하지 않다면 -1반환
+	for (x = 0; x < systemSize[0]; x++)
+	{
+		for (y = 0; y < systemSize[1]; y++)
+		{
+			if (inputPasswd(x, y) == deliverySystem[x][y].passwd) //passwd와 저장된 passwd가 같으면
+			{
+				return 0;
 
-   printStorageInside(x, y); // 정보 출력
+				free(context); //동적 메모리 
 
-   initStorage(x, y); // 초기화
+				printStorageInside(x, y);
 
-   return 0;
+				initStorage(x, y);
+			}
+		}
+	}
+	return -1;
 }
 
 //find my package from the storage
