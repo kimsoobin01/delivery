@@ -230,7 +230,7 @@ int str_extractStorage(int x, int y) {
 			{
 				return 0;
 
-				free(context); //동적 메모리 
+				free(context); //동적 메모리 해제  
 
 				printStorageInside(x, y);
 
