@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 	int cmd;
 	int x, y, nBuilding, nRoom;
 	char msg[MAX_MSG_SIZE+1];
-	char passwd[PASSWD_LEN+1];
+	char passwd[PASSWD_LEN + 1];
 	
 	//1. initialize the delivery system
 	if (str_createSystem(STORAGE_FILEPATH) != 0)
@@ -200,3 +200,4 @@ int main(int argc, char *argv[]) {
 	
 	return 0;
 }
+
